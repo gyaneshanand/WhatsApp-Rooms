@@ -25,10 +25,16 @@ function Chat() {
     const [{user} , dispatch] = useStateValue();
     const [emoji, setEmoji] = useState(null);
 
+    const textInput = useRef();
+
+    // const focusTextInput = () => textInput.current.focus();
+
     const addEmoji = (e,emojiObject) => {
         let emoji = e.native;
         setInput(input + emojiObject.emoji);
-        console.log(input)
+        //console.log(input);
+        //To get the curser back to text input field
+        textInput.current.focus();
       };
 
     const checkEmojiClose = () => {
@@ -74,7 +80,12 @@ function Chat() {
                     timestamp : firebase.firestore.FieldValue.serverTimestamp()
                 }
             )
+        // Clear the Input field after sending the message
         setInput("");
+        // Close the emoji picker also after sending the message
+        if (emoji) {
+            setEmoji(null);
+        }
     };
 
     const messagesEndRef = useRef(null);
@@ -92,6 +103,8 @@ function Chat() {
     useEffect(() => {
         scrollToBottom();
     }, [roomName,messages]);
+
+    
 
     return (
         <div className="chat">
@@ -145,10 +158,11 @@ function Chat() {
                 <IconButton>           
                     <InsertEmoticonIcon onClick={() => setEmoji(!emoji)}/>
                     {emoji ? <Picker onEmojiClick={addEmoji} skinTone={SKIN_TONE_MEDIUM_LIGHT} 
-                        groupVisibility={{flags: false,}} /> : null } 
+                        groupVisibility={{flags: false,}} disableSearchBar={true} /> : null } 
                 </IconButton>
                 <form>
-                    <input value={input} onChange={ e => setInput(e.target.value)}  onClick={checkEmojiClose} type="text" placeholder="Type a message"></input>
+                    <input value={input} onChange={ e => setInput(e.target.value)}  
+                        onClick={checkEmojiClose} ref={textInput} type="text" placeholder="Type a message"></input>
                     <button type="submit" onClick={sendMessage} >Send a Message</button>
                 </form>
                 <IconButton>
